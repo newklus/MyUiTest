@@ -7,7 +7,7 @@ export const DEFAULT_CONFIG: PresetConfig = {
   motion: 'smooth',
   tokens: {},
   background: { shader: 'none', speed: 0.25, overlay: 'none' },
-  card: { glow: 'none', tilt: false },
+  card: { glow: 'none', tilt: false, decor: 'none' },
   button: { ripple: false, press: false },
   window: { windows: [], macos: [] },
 };

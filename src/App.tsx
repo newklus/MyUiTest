@@ -35,6 +35,12 @@ const packs = [
   { name: 'terminal', hint: '터미널' },
   { name: 'brutal', hint: '브루탈' },
   { name: 'clay', hint: '클레이' },
+  { name: 'macos', hint: '맥OS 느낌' },
+  { name: 'goryeo', hint: '중세 한국' },
+  { name: 'cyber', hint: '사이버펑크' },
+  { name: 'forest', hint: '숲속' },
+  { name: 'fantasy', hint: '판타지' },
+  { name: 'steampunk', hint: '스팀펑크' },
   { name: 'calm', hint: 'glass 상속' },
 ];
 
@@ -77,7 +83,7 @@ export default function App() {
                 엔진이 정합니다.
               </p>
             </div>
-            <PresetSwitcher items={packs} />
+            <PresetSwitcher items={packs} minItemWidth={136} />
           </header>
 
           <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">

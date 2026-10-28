@@ -67,6 +67,13 @@ function LayerControls() {
       set: (on) =>
         override('background.overlay', on ? (base.background.overlay !== 'none' ? base.background.overlay : 'grain') : 'none'),
     },
+    {
+      id: 'opt-decor',
+      label: '장식',
+      path: 'card.decor',
+      on: config.card.decor !== 'none',
+      set: (on) => override('card.decor', on ? (base.card.decor !== 'none' ? base.card.decor : 'corners') : 'none'),
+    },
   ];
 
   return (
@@ -213,6 +220,7 @@ function PresetCode() {
     ['motion', ui.config.motion, 'motion'],
     ['glow', ui.config.card.glow, 'card.glow'],
     ['tilt', ui.config.card.tilt ? 'on' : 'off', 'card.tilt'],
+    ['decor', ui.config.card.decor, 'card.decor'],
     ['ripple', ui.config.button.ripple ? 'on' : 'off', 'button.ripple'],
     ['press', ui.config.button.press ? 'on' : 'off', 'button.press'],
     ['bg', shader === 'none' ? 'none' : `${shader} ×${ui.config.background.speed}`, 'background.shader'],

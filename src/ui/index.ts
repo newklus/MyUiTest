@@ -3,6 +3,7 @@ export { UIProvider, type UIProviderProps } from './engine/UIProvider';
 export { useUI, type UIContextValue } from './engine/context';
 export { resolvePreset, DEFAULT_CONFIG } from './engine/resolve';
 export type {
+  DecorName,
   DeepPartial,
   GlowName,
   MotionName,
@@ -17,7 +18,7 @@ export type {
 } from './engine/types';
 
 // data
-export { themes, glass, neon, minimal, terminal, brutal, clay } from './themes';
+export { themes, glass, neon, minimal, terminal, brutal, clay, macos, goryeo, cyber, forest, fantasy, steampunk } from './themes';
 export { presets, type PresetName } from './presets';
 export { motionPresets, type MotionPreset } from './motion/presets';
 export { glows, glowVars } from './effects/glows';
