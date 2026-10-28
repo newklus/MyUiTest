@@ -1,0 +1,180 @@
+/*
+ * UI 엔진 ↔ Tailwind v4 연결.
+ * 앱의 메인 CSS에서 `@import "tailwindcss";` 바로 다음 줄에 import 하세요.
+ *
+ * 엔진(UIProvider)이 <html>에 --ui-* 변수를 쓰고, 아래 @theme inline이 그 변수를
+ * Tailwind 클래스(bg-surface, text-accent, rounded-ui …)에 연결합니다.
+ * 그래서 프리셋을 바꾸면 클래스를 하나도 안 바꿔도 화면 전체가 바뀝니다.
+ */
+
+/* ---------- 1. 토큰 → Tailwind 클래스 ---------- */
+@theme inline {
+  --color-bg: var(--ui-bg);
+  --color-surface: var(--ui-surface);
+  --color-surface-2: var(--ui-surface-2);
+  --color-line: var(--ui-line);
+  --color-fg: var(--ui-fg);
+  --color-muted: var(--ui-muted);
+  --color-accent: var(--ui-accent);
+  --color-accent-2: var(--ui-accent-2);
+  --color-on-accent: var(--ui-on-accent);
+  --color-ok: var(--ui-ok);
+  --color-track: var(--ui-track);
+  --color-code: var(--ui-code-bg);
+
+  --radius-ui: var(--ui-radius);
+  --radius-ui-sm: calc(var(--ui-radius) * 0.6);
+  --radius-ui-xs: calc(var(--ui-radius) * 0.45);
+
+  --font-display: var(--ui-font-display);
+  --font-body: var(--ui-font-body);
+  --font-mono: var(--ui-font-mono);
+
+  --ease-ui: var(--ui-ease);
+  /* transition, transition-colors 같은 기본 클래스가 모션 프리셋 속도를 따라갑니다. */
+  --default-transition-duration: var(--ui-dur);
+  --default-transition-timing-function: var(--ui-ease);
+}
+
+/* dark: 접두사가 OS 설정 대신 프리셋의 명암을 따르게 합니다.
+   앱에 이미 dark 변형을 정의해 뒀다면 이 줄은 지우세요. */
+@custom-variant dark (&:where([data-scheme="dark"], [data-scheme="dark"] *));
+
+/* ---------- 2. JS가 돌기 전 기본값 (glass) ---------- */
+@layer base {
+  :root {
+    color-scheme: dark;
+    --ui-bg: #0b1026;
+    --ui-bg-tint: rgba(11, 16, 38, 0.6);
+    --ui-surface: rgba(255, 255, 255, 0.075);
+    --ui-surface-2: rgba(255, 255, 255, 0.12);
+    --ui-line: rgba(255, 255, 255, 0.16);
+    --ui-fg: #eef1ff;
+    --ui-muted: rgba(226, 232, 255, 0.7);
+    --ui-accent: #8ef0dc;
+    --ui-accent-2: #b9a8ff;
+    --ui-on-accent: #05231d;
+    --ui-ok: #8ef0a8;
+    --ui-track: rgba(255, 255, 255, 0.14);
+    --ui-code-bg: rgba(5, 9, 28, 0.5);
+    --ui-radius: 20px;
+    --ui-backdrop: blur(18px) saturate(150%);
+    --ui-shadow: 0 14px 40px rgba(2, 6, 23, 0.45);
+    --ui-sheen: 0.16;
+    --ui-font-display: "Gothic A1", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+    --ui-font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+    --ui-font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --ui-display-weight: 800;
+    --ui-heading-weight: 600;
+    --ui-label-tracking: 0.06em;
+    --ui-glow-size: 22px;
+    --ui-glow-strength: 32%;
+    --ui-text-glow: none;
+    --ui-dur: 420ms;
+    --ui-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* 배경은 html에만 칠합니다. 창 효과가 켜지면 --ui-bg가 반투명이 되어 mica·vibrancy가 비칩니다. */
+  html {
+    background: var(--ui-bg);
+    transition: background-color var(--ui-dur) var(--ui-ease);
+  }
+  body {
+    background: transparent;
+    color: var(--ui-fg);
+    font-family: var(--ui-font-body);
+    -webkit-font-smoothing: antialiased;
+    transition: color var(--ui-dur) var(--ui-ease);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      transition-duration: 1ms !important;
+      animation-duration: 1ms !important;
+      animation-iteration-count: 1 !important;
+    }
+  }
+}
+
+/* ---------- 3. 이펙트 유틸리티 ---------- */
+@utility ui-backdrop {
+  -webkit-backdrop-filter: var(--ui-backdrop);
+  backdrop-filter: var(--ui-backdrop);
+}
+
+@utility ui-shadow {
+  box-shadow: var(--ui-shadow);
+}
+
+/* 테마 그림자 + accent 색 발광. 글로우 프리셋이 none이면 그림자만 남습니다. */
+@utility glow {
+  box-shadow:
+    var(--ui-shadow),
+    0 0 var(--ui-glow-size) color-mix(in srgb, var(--ui-accent) var(--ui-glow-strength), transparent);
+}
+
+@utility glow-sm {
+  box-shadow: 0 0 calc(var(--ui-glow-size) * 0.6) color-mix(in srgb, var(--ui-accent) var(--ui-glow-strength), transparent);
+}
+
+@utility text-glow {
+  text-shadow: var(--ui-text-glow);
+}
+
+/* useTilt()가 --ui-rx/--ui-ry를 씁니다. */
+@utility tilt {
+  transform: perspective(900px) rotateX(var(--ui-rx, 0deg)) rotateY(var(--ui-ry, 0deg));
+}
+
+/* 포인터를 따라다니는 하이라이트. useTilt()가 --ui-mx/--ui-my를 씁니다. */
+@utility sheen {
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(
+      260px circle at var(--ui-mx, 50%) var(--ui-my, 0%),
+      rgb(255 255 255 / var(--ui-sheen)),
+      transparent 65%
+    );
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  &:hover::after {
+    opacity: 1;
+  }
+}
+
+/* 타이포 역할. 글꼴과 굵기가 테마마다 달라서 클래스 하나로 묶었습니다. */
+@utility type-display {
+  font-family: var(--ui-font-display);
+  font-weight: var(--ui-display-weight);
+}
+
+@utility type-heading {
+  font-family: var(--ui-font-display);
+  font-weight: var(--ui-heading-weight);
+}
+
+@utility label-caps {
+  font-size: 11px;
+  line-height: 1.3;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--ui-label-tracking);
+}
+
+/* useRipple()이 버튼 안에 만드는 원 */
+@layer components {
+  .ui-ripple {
+    position: absolute;
+    border-radius: 9999px;
+    background: currentColor;
+    pointer-events: none;
+    opacity: 0;
+  }
+}

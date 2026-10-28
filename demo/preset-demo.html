@@ -1,0 +1,972 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>UI 엔진 프리셋</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;600;800&family=IBM+Plex+Sans+KR:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Orbit&display=swap">
+<style>
+/* Layout: 헤더(이름 + 스타일 팩 스위처) → 앱 창 미리보기 | 인스펙터(조절·코드·토큰). 960px 미만은 한 열.
+   프리셋이 곧 테마: 각 스타일 팩이 배경과 모든 색을 직접 정한다(glass·neon = dark, minimal = light).
+   아래 값은 glass 기본값이며, 스크립트의 엔진이 선택된 프리셋 값으로 덮어쓴다. */
+:root{
+  color-scheme: dark;
+  --bg:#0b1026;
+  --win:rgba(255,255,255,0.035);
+  --surface:rgba(255,255,255,0.075);
+  --surface-2:rgba(255,255,255,0.12);
+  --border:rgba(255,255,255,0.16);
+  --fg:#eef1ff;
+  --muted:rgba(226,232,255,0.7);
+  --accent:#8ef0dc;
+  --accent-2:#b9a8ff;
+  --on-accent:#05231d;
+  --ok:#8ef0a8;
+  --track:rgba(255,255,255,0.14);
+  --code-bg:rgba(5,9,28,0.5);
+  --code-k:#b9a8ff;
+  --code-s:#8ef0dc;
+  --code-n:#ffd58a;
+  --code-p:rgba(226,232,255,0.5);
+  --radius:20px;
+  --backdrop:blur(18px) saturate(150%);
+  --shadow:0 14px 40px rgba(2,6,23,0.45);
+  --sheen:0.16;
+  --font-display:"Gothic A1","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --display-weight:800;
+  --h2-weight:600;
+  --label-track:0.06em;
+  --font-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --glow-size:22px;
+  --glow-color:rgba(142,240,220,0.32);
+  --text-glow:none;
+  --dur:420ms;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{
+  background:var(--bg); color:var(--fg);
+  font:14px/1.6 var(--font-body);
+  -webkit-font-smoothing:antialiased;
+  overflow-x:clip;
+  transition:background-color var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+#bg{position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; transition:opacity var(--dur) var(--ease)}
+
+.page{
+  position:relative; z-index:1;
+  max-width:1200px; margin:0 auto;
+  padding-block:28px 64px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+  display:grid; gap:24px;
+}
+
+/* ---------- header ---------- */
+.top{display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:18px 32px}
+.top-text{flex:1 1 320px; min-width:0}
+.eyebrow{margin:0 0 8px; font:500 12px/1.4 var(--font-mono); color:var(--muted)}
+h1{
+  margin:0; font-family:var(--font-display); font-weight:var(--display-weight);
+  font-size:clamp(30px, 5.4vw, 46px); line-height:1.12; letter-spacing:-0.01em;
+  text-wrap:balance; text-shadow:var(--text-glow);
+  transition:text-shadow var(--dur) var(--ease);
+}
+.lede{margin:10px 0 0; max-width:54ch; color:var(--muted)}
+
+.switcher{
+  flex:1 1 360px; max-width:520px; position:relative;
+  display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:2px; padding:4px;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:calc(var(--radius) * .75);
+  backdrop-filter:var(--backdrop); -webkit-backdrop-filter:var(--backdrop);
+  transition:background-color var(--dur) var(--ease), border-color var(--dur) var(--ease), border-radius var(--dur) var(--ease);
+}
+.ind{
+  position:absolute; left:0; top:4px; bottom:4px; width:0;
+  border-radius:calc(var(--radius) * .55);
+  background:var(--accent);
+  box-shadow:0 0 var(--glow-size) var(--glow-color);
+  transition:transform var(--dur) var(--ease), width var(--dur) var(--ease), background-color var(--dur) var(--ease), border-radius var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+.switcher.no-anim .ind{transition:none}
+.seg{
+  position:relative; z-index:1; appearance:none; border:0; background:transparent; color:var(--fg);
+  padding:9px 4px 8px; border-radius:calc(var(--radius) * .55); cursor:pointer;
+  display:grid; gap:2px; justify-items:center; font:inherit;
+  transition:color var(--dur) var(--ease);
+}
+.seg b{font:600 14px/1.2 var(--font-mono)}
+.seg small{font-size:11px; line-height:1.3; color:var(--muted); transition:color var(--dur) var(--ease)}
+.seg[aria-checked="true"], .seg[aria-checked="true"] small{color:var(--on-accent)}
+.seg:focus-visible, .mseg:focus-visible, .btn:focus-visible, .link:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+/* ---------- layout ---------- */
+.layout{display:grid; gap:20px; align-items:start}
+@media (min-width:960px){ .layout{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)} }
+.preview{min-width:0}
+
+/* ---------- card (components/Card) ---------- */
+.card{
+  --tt:var(--dur); --te:var(--ease);
+  position:relative;
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  backdrop-filter:var(--backdrop); -webkit-backdrop-filter:var(--backdrop);
+  transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));
+  transition:transform var(--tt) var(--te), box-shadow var(--dur) var(--ease), background-color var(--dur) var(--ease), border-color var(--dur) var(--ease), border-radius var(--dur) var(--ease);
+}
+.card.tilting{--tt:80ms; --te:linear}
+.card[data-glow]{box-shadow:var(--shadow), 0 0 var(--glow-size) var(--glow-color)}
+[data-tilt]::after{
+  content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  background:radial-gradient(260px circle at var(--mx,50%) var(--my,0%), rgba(255,255,255,var(--sheen)), transparent 65%);
+  opacity:0; transition:opacity .25s ease;
+}
+[data-tilt]:hover::after{opacity:1}
+
+/* ---------- app window ---------- */
+.window{
+  container-type:inline-size; min-width:0;
+  background:var(--win); border:1px solid var(--border); border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  transition:background-color var(--dur) var(--ease), border-color var(--dur) var(--ease), border-radius var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+.titlebar{
+  display:flex; align-items:center; gap:12px; padding:12px 16px;
+  border-bottom:1px solid var(--border); user-select:none;
+}
+.dots{display:flex; gap:6px}
+.dots i{width:11px; height:11px; border-radius:50%; background:var(--track)}
+.dots i:first-child{background:var(--accent); box-shadow:0 0 calc(var(--glow-size) * .4) var(--glow-color)}
+.wtitle{font:500 13px/1 var(--font-mono); color:var(--muted); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.wtag{margin-left:auto; flex:none; font:500 11px/1 var(--font-mono); color:var(--muted); padding:5px 8px; border:1px dashed var(--border); border-radius:999px}
+.wbody{padding:16px; display:grid; gap:14px}
+.stats{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px}
+.wcols{display:grid; gap:14px; align-items:start}
+@container (min-width: 600px){
+  .wbody{padding:20px; gap:16px}
+  .stats{gap:14px}
+  .wcols{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+}
+
+.stat{padding:14px 12px; display:grid; gap:4px; align-content:start; min-width:0}
+.label{margin:0; font:600 11px/1.3 var(--font-body); letter-spacing:var(--label-track); text-transform:uppercase; color:var(--muted)}
+.num{
+  margin:0; white-space:nowrap;
+  font-family:var(--font-display); font-weight:var(--display-weight);
+  font-size:clamp(20px, 5cqi, 30px); line-height:1.15;
+  font-variant-numeric:tabular-nums; text-shadow:var(--text-glow);
+}
+.num span{font-size:.55em; margin-left:3px; color:var(--muted)}
+.sub{margin:0; font-size:12px; line-height:1.4; color:var(--muted)}
+
+.panel{padding:16px; min-width:0}
+.phead{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px}
+h2{margin:0; font-family:var(--font-display); font-weight:var(--h2-weight); font-size:15px; line-height:1.3}
+.count{font:500 12px/1 var(--font-mono); color:var(--muted)}
+
+.tasks{list-style:none; margin:0; padding:0}
+.tasks li{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 0; border-top:1px solid var(--border)}
+.tasks li:first-child{border-top:0}
+.tinfo{display:grid; gap:1px; min-width:0}
+.tname{font-weight:500}
+.meta{font-size:12px; color:var(--muted)}
+.chip{
+  display:inline-flex; align-items:center; gap:6px; flex:none;
+  padding:4px 9px; border-radius:calc(var(--radius) * .5);
+  font:600 11.5px/1.3 var(--font-body); white-space:nowrap;
+  transition:border-radius var(--dur) var(--ease);
+}
+.chip.ok{color:var(--ok); background:color-mix(in srgb, var(--ok) 15%, transparent)}
+.chip.run{color:var(--accent); background:color-mix(in srgb, var(--accent) 16%, transparent)}
+.chip.run::before{content:""; width:6px; height:6px; border-radius:50%; background:currentColor; animation:pulse 1.4s ease-in-out infinite}
+.chip.idle{color:var(--muted); background:var(--track)}
+@keyframes pulse{50%{opacity:.25}}
+
+.field{display:grid; gap:6px; padding:8px 0 12px}
+.field label{font-size:12px; color:var(--muted)}
+.input{
+  width:100%; padding:10px 12px;
+  background:var(--surface-2); color:var(--fg);
+  border:1px solid var(--border); border-radius:calc(var(--radius) * .55);
+  font:500 14px/1.4 var(--font-mono);
+  transition:border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease), border-radius var(--dur) var(--ease);
+}
+.input:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent)}
+
+.row{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 0; border-top:1px solid var(--border); cursor:pointer}
+.row > span{display:grid; gap:2px; min-width:0}
+.row code{font:400 11px/1.3 var(--font-mono); color:var(--muted); overflow-wrap:anywhere}
+
+.switch{
+  appearance:none; -webkit-appearance:none; margin:0; flex:none; position:relative; cursor:pointer;
+  width:42px; height:24px; border-radius:calc(var(--radius) * .8);
+  background:var(--track); border:1px solid var(--border);
+  transition:background-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease), border-radius var(--dur) var(--ease);
+}
+.switch::before{
+  content:""; position:absolute; top:2px; left:2px; width:18px; height:18px;
+  border-radius:calc(var(--radius) * .7); background:var(--fg);
+  transition:transform var(--dur) var(--ease), background-color var(--dur) var(--ease), border-radius var(--dur) var(--ease);
+}
+.switch:checked{background:var(--accent); border-color:transparent; box-shadow:0 0 calc(var(--glow-size) * .6) var(--glow-color)}
+.switch:checked::before{transform:translateX(18px); background:var(--on-accent)}
+.switch:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+.progress{display:grid; gap:8px; padding-top:12px; border-top:1px solid var(--border)}
+.ptop{display:flex; justify-content:space-between; font-size:13px; color:var(--muted)}
+.pval{font-family:var(--font-mono); color:var(--fg); font-variant-numeric:tabular-nums}
+.bar{height:8px; border-radius:calc(var(--radius) * .4); background:var(--track)}
+.bar i{
+  display:block; height:100%; width:72%; border-radius:inherit;
+  background:linear-gradient(90deg, var(--accent), var(--accent-2));
+  box-shadow:0 0 calc(var(--glow-size) * .5) var(--glow-color);
+}
+
+.actions{display:flex; gap:8px; padding-top:16px}
+.btn{
+  position:relative; overflow:hidden; flex:1; cursor:pointer;
+  padding:12px 14px; border:1px solid transparent; border-radius:calc(var(--radius) * .6);
+  font:600 14px/1.2 var(--font-body);
+  transition:transform var(--dur) var(--ease), background-color var(--dur) var(--ease), border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease), border-radius var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--accent); color:var(--on-accent); box-shadow:0 0 var(--glow-size) var(--glow-color)}
+.btn-primary:hover{filter:brightness(1.07)}
+.btn-ghost{background:transparent; color:var(--fg); border-color:var(--border)}
+.btn-ghost:hover{border-color:var(--accent)}
+.ripple{position:absolute; border-radius:50%; background:currentColor; pointer-events:none; opacity:0}
+
+.note{margin:10px 2px 0; font-size:12.5px; color:var(--muted); max-width:70ch}
+
+/* ---------- inspector ---------- */
+.inspector{display:grid; gap:16px; min-width:0}
+.ins{padding:16px; min-width:0}
+.ihead{display:flex; align-items:center; gap:10px; margin-bottom:12px; flex-wrap:wrap}
+.file{margin-left:auto; font:400 11.5px/1.3 var(--font-mono); color:var(--muted)}
+.link{
+  appearance:none; background:transparent; color:var(--fg); cursor:pointer;
+  border:1px solid var(--border); border-radius:calc(var(--radius) * .45);
+  padding:6px 10px; font:500 12px/1.2 var(--font-body);
+  transition:border-color var(--dur) var(--ease), opacity .2s;
+}
+.link:hover:not(:disabled){border-color:var(--accent)}
+.link:disabled{opacity:.4; cursor:default}
+.ihead .link:first-of-type{margin-left:auto}
+.ihead .file + .link{margin-left:0}
+
+.group{margin:6px 0 2px; font:500 11.5px/1.4 var(--font-mono); color:var(--muted)}
+.opts{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); column-gap:16px; margin-bottom:10px}
+.motion{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:6px; margin-top:8px}
+.mseg{
+  appearance:none; cursor:pointer; display:grid; gap:2px; justify-items:center;
+  padding:9px 4px; background:var(--surface-2); color:var(--fg);
+  border:1px solid var(--border); border-radius:calc(var(--radius) * .5);
+  font:600 13px/1.2 var(--font-mono);
+  transition:background-color var(--dur) var(--ease), color var(--dur) var(--ease), border-color var(--dur) var(--ease), border-radius var(--dur) var(--ease);
+}
+.mseg small{font:400 11px/1.2 var(--font-mono); color:var(--muted)}
+.mseg:hover{border-color:var(--accent)}
+.mseg[aria-checked="true"]{background:var(--accent); color:var(--on-accent); border-color:transparent}
+.mseg[aria-checked="true"] small{color:var(--on-accent); opacity:.8}
+
+.code{
+  margin:0; padding:14px; overflow-x:auto;
+  background:var(--code-bg); color:var(--fg);
+  border:1px solid var(--border); border-radius:calc(var(--radius) * .6);
+  font:12.5px/1.7 var(--font-mono); tab-size:2;
+}
+.code .k{color:var(--code-k)} .code .s{color:var(--code-s)} .code .n{color:var(--code-n)} .code .p{color:var(--code-p)}
+.rlabel{margin:14px 0 8px; font-size:12px; color:var(--muted)}
+.resolved{display:flex; flex-wrap:wrap; gap:6px}
+.rchip{
+  font:400 11.5px/1.2 var(--font-mono); padding:6px 8px; color:var(--muted);
+  border:1px solid var(--border); border-radius:calc(var(--radius) * .4);
+}
+.rchip b{font-weight:500; color:var(--fg)}
+.rchip.changed{border-color:var(--accent)}
+.rchip.changed b{color:var(--accent)}
+
+.swatches{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:12px 14px}
+.sw{display:grid; grid-template-columns:30px minmax(0,1fr); column-gap:10px; align-items:center}
+.sw i{grid-row:span 2; width:30px; height:30px; border-radius:calc(var(--radius) * .35); border:1px solid var(--border)}
+.sw i.r{background:transparent; border:2px solid var(--accent)}
+.sw i.f{display:grid; place-items:center; font-style:normal; font-size:16px; font-weight:var(--display-weight); background:var(--surface-2)}
+.sw b{font:500 12px/1.3 var(--font-mono)}
+.sw span{font:400 11px/1.3 var(--font-mono); color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.sw.changed b{color:var(--accent)}
+
+/* ---------- toast ---------- */
+.toast{
+  position:fixed; left:50%; z-index:30;
+  bottom:calc(20px + env(safe-area-inset-bottom, 0px));
+  transform:translate(-50%, 0);
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:center;
+  max-width:calc(100vw - 32px); padding:12px 16px;
+  background:var(--accent); color:var(--on-accent);
+  border-radius:calc(var(--radius) * .7);
+  box-shadow:var(--shadow), 0 0 var(--glow-size) var(--glow-color);
+  font-weight:600;
+}
+.toast small{font:500 11px/1.2 var(--font-mono); opacity:.75}
+
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{transition-duration:.01ms !important}
+  .chip.run::before{animation:none}
+}
+</style>
+</head>
+<body>
+
+<canvas id="bg" aria-hidden="true"></canvas>
+
+<div class="page">
+  <header class="top">
+    <div class="top-text">
+      <p class="eyebrow">packages/ui · presets</p>
+      <h1>UI 엔진 프리셋</h1>
+      <p class="lede">스타일 팩을 고르면 토큰, 이펙트, 모션이 한 번에 바뀌어요. 레이어를 하나씩 바꾸면 그 팩을 extends한 커스텀 프리셋 코드가 만들어져요.</p>
+    </div>
+    <div class="switcher no-anim" id="switcher" role="radiogroup" aria-label="스타일 팩">
+      <span class="ind" id="ind" aria-hidden="true"></span>
+      <button class="seg" role="radio" data-preset="glass"><b>glass</b><small>유리</small></button>
+      <button class="seg" role="radio" data-preset="neon"><b>neon</b><small>네온</small></button>
+      <button class="seg" role="radio" data-preset="minimal"><b>minimal</b><small>미니멀</small></button>
+      <button class="seg" role="radio" data-preset="calm"><b>calm</b><small>glass 상속</small></button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <div class="preview">
+      <section class="window" aria-label="앱 미리보기">
+        <div class="titlebar" data-tauri-drag-region>
+          <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span class="wtitle">atlas-desktop</span>
+          <span class="wtag" title="data-tauri-drag-region">drag-region</span>
+        </div>
+        <div class="wbody">
+          <div class="stats">
+            <article class="card stat" data-tilt="12" data-glow>
+              <p class="label">성공률</p>
+              <p class="num">98.4<span>%</span></p>
+              <p class="sub">최근 빌드 50회</p>
+            </article>
+            <article class="card stat" data-tilt="12" data-glow>
+              <p class="label">번들 크기</p>
+              <p class="num">4.2<span>MB</span></p>
+              <p class="sub">지난주 −0.6 MB</p>
+            </article>
+            <article class="card stat" data-tilt="12" data-glow>
+              <p class="label">컴파일</p>
+              <p class="num">38<span>초</span></p>
+              <p class="sub">Rust 증분 빌드</p>
+            </article>
+          </div>
+
+          <div class="wcols">
+            <section class="card panel" data-tilt="3" aria-labelledby="h-tasks">
+              <header class="phead"><h2 id="h-tasks">최근 작업</h2><span class="count">3건</span></header>
+              <ul class="tasks">
+                <li><span class="tinfo"><span class="tname">프론트 번들 빌드</span><span class="meta">2분 전</span></span><span class="chip ok">완료</span></li>
+                <li><span class="tinfo"><span class="tname">Rust 코어 컴파일</span><span class="meta">지금</span></span><span class="chip run">진행 중</span></li>
+                <li><span class="tinfo"><span class="tname">업데이트 서명</span><span class="meta">대기열 1번</span></span><span class="chip idle">대기</span></li>
+              </ul>
+            </section>
+
+            <section class="card panel" data-tilt="3" aria-labelledby="h-settings">
+              <header class="phead"><h2 id="h-settings">프로젝트 설정</h2></header>
+              <div class="field">
+                <label for="app-name">프로젝트 이름</label>
+                <input class="input" id="app-name" value="atlas-desktop" autocomplete="off" spellcheck="false">
+              </div>
+              <label class="row" for="app-update"><span>자동 업데이트</span><input type="checkbox" role="switch" class="switch" id="app-update" checked></label>
+              <label class="row" for="app-vibrancy"><span>창 투명 효과</span><input type="checkbox" role="switch" class="switch" id="app-vibrancy" checked></label>
+              <div class="progress">
+                <div class="ptop"><span>원격 동기화</span><span class="pval">72%</span></div>
+                <div class="bar" role="progressbar" aria-valuenow="72" aria-valuemin="0" aria-valuemax="100" aria-label="원격 동기화"><i></i></div>
+              </div>
+              <div class="actions">
+                <button class="btn btn-primary" id="run" data-ripple>빌드 실행</button>
+                <button class="btn btn-ghost" id="replay" data-ripple>다시 그리기</button>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
+      <p class="note">창 자체의 mica·acrylic 효과는 Tauri의 windowEffects 설정이 맡아요. 이 데모는 그 위의 웹 레이어(토큰·이펙트·모션)만 보여줘요.</p>
+    </div>
+
+    <aside class="inspector">
+      <section class="card ins" aria-labelledby="h-ctrl">
+        <header class="ihead">
+          <h2 id="h-ctrl">레이어 직접 조절</h2>
+          <button class="link" id="reset" disabled>프리셋 값으로</button>
+        </header>
+        <p class="group">effects/</p>
+        <div class="opts">
+          <label class="row" for="opt-glow"><span>글로우<code>card.glow</code></span><input type="checkbox" role="switch" class="switch" id="opt-glow"></label>
+          <label class="row" for="opt-tilt"><span>틸트<code>card.tilt</code></span><input type="checkbox" role="switch" class="switch" id="opt-tilt"></label>
+          <label class="row" for="opt-ripple"><span>리플<code>button.ripple</code></span><input type="checkbox" role="switch" class="switch" id="opt-ripple"></label>
+          <label class="row" for="opt-bg"><span>배경 셰이더<code>background.shader</code></span><input type="checkbox" role="switch" class="switch" id="opt-bg"></label>
+        </div>
+        <p class="group">motion/</p>
+        <div class="motion" id="motion" role="radiogroup" aria-label="모션 프리셋">
+          <button class="mseg" role="radio" data-motion="smooth">smooth<small>420ms</small></button>
+          <button class="mseg" role="radio" data-motion="bouncy">bouncy<small>560ms</small></button>
+          <button class="mseg" role="radio" data-motion="snappy">snappy<small>160ms</small></button>
+        </div>
+      </section>
+
+      <section class="card ins" aria-labelledby="h-code">
+        <header class="ihead">
+          <h2 id="h-code">현재 스타일 팩</h2>
+          <span class="file" id="file">presets/glass.ts</span>
+          <button class="link" id="copy">복사</button>
+        </header>
+        <pre class="code"><code id="code"></code></pre>
+        <p class="rlabel">적용 결과 (상속·덮어쓰기 반영)</p>
+        <div class="resolved" id="resolved"></div>
+      </section>
+
+      <section class="card ins" aria-labelledby="h-tokens">
+        <header class="ihead">
+          <h2 id="h-tokens">토큰</h2>
+          <span class="file" id="tfile">themes/glass</span>
+        </header>
+        <div class="swatches" id="swatches"></div>
+      </section>
+    </aside>
+  </main>
+</div>
+
+<div aria-live="polite"><div class="toast" id="toast" hidden></div></div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = s => document.querySelector(s);
+  const $$ = s => [...document.querySelectorAll(s)];
+  const root = document.documentElement;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  const KEY = 'ui-engine-preset';
+
+  const F = {
+    gothic: '"Gothic A1","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif',
+    plex: '"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif',
+    orbit: '"Orbit","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif'
+  };
+
+  /* ===== themes/ : 토큰 세트 ===== */
+  const themes = {
+    glass: {
+      scheme: 'dark', textGlow: false, shader: 'aurora',
+      bgColors: { a: '45,212,191', b: '99,102,241', c: '244,114,182' },
+      vars: {
+        bg: '#0b1026', win: 'rgba(255,255,255,0.035)', surface: 'rgba(255,255,255,0.075)', 'surface-2': 'rgba(255,255,255,0.12)',
+        border: 'rgba(255,255,255,0.16)', fg: '#eef1ff', muted: 'rgba(226,232,255,0.7)', accent: '#8ef0dc', 'accent-2': '#b9a8ff',
+        'on-accent': '#05231d', ok: '#8ef0a8', track: 'rgba(255,255,255,0.14)',
+        'code-bg': 'rgba(5,9,28,0.5)', 'code-k': '#b9a8ff', 'code-s': '#8ef0dc', 'code-n': '#ffd58a', 'code-p': 'rgba(226,232,255,0.5)',
+        radius: '20px', backdrop: 'blur(18px) saturate(150%)', shadow: '0 14px 40px rgba(2,6,23,0.45)', sheen: '0.16',
+        'font-display': F.gothic, 'display-weight': '800', 'h2-weight': '600', 'label-track': '0.06em'
+      }
+    },
+    neon: {
+      scheme: 'dark', textGlow: true, shader: 'grid',
+      bgColors: { a: '255,43,214', b: '34,230,255', c: '255,43,214' },
+      vars: {
+        bg: '#08060f', win: 'rgba(12,9,24,0.9)', surface: 'rgba(20,14,38,0.92)', 'surface-2': '#1d1535',
+        border: 'rgba(255,43,214,0.5)', fg: '#f7f2ff', muted: '#ab9fcc', accent: '#ff2bd6', 'accent-2': '#22e6ff',
+        'on-accent': '#17001d', ok: '#3dffb4', track: 'rgba(34,230,255,0.16)',
+        'code-bg': '#0c0918', 'code-k': '#22e6ff', 'code-s': '#ff7be8', 'code-n': '#ffe14d', 'code-p': '#7f74a6',
+        radius: '6px', backdrop: 'none', shadow: '0 0 0 rgba(0,0,0,0)', sheen: '0.08',
+        'font-display': F.orbit, 'display-weight': '400', 'h2-weight': '400', 'label-track': '0.12em'
+      }
+    },
+    minimal: {
+      scheme: 'light', textGlow: false, shader: 'dots',
+      bgColors: { a: '21,23,28', b: '36,70,216', c: '21,23,28' },
+      vars: {
+        bg: '#f4f5f7', win: '#eaecf0', surface: '#ffffff', 'surface-2': '#f1f2f5',
+        border: '#d9dce3', fg: '#15171c', muted: '#5a616e', accent: '#2446d8', 'accent-2': '#15171c',
+        'on-accent': '#ffffff', ok: '#127a4a', track: '#e1e4ea',
+        'code-bg': '#f4f5f7', 'code-k': '#2446d8', 'code-s': '#127a4a', 'code-n': '#9a5b00', 'code-p': '#8a909c',
+        radius: '10px', backdrop: 'none', shadow: '0 1px 2px rgba(21,23,28,0.06), 0 8px 24px rgba(21,23,28,0.05)', sheen: '0',
+        'font-display': F.plex, 'display-weight': '600', 'h2-weight': '600', 'label-track': '0.04em'
+      }
+    }
+  };
+
+  /* ===== effects/ : 이펙트 프리셋 ===== */
+  const glows = {
+    'glow-soft': { size: 22, alpha: 0.32 },
+    'glow-strong': { size: 30, alpha: 0.72 },
+    none: { size: 0, alpha: 0 }
+  };
+
+  /* ===== motion/ : 모션 프리셋 ===== */
+  const motions = {
+    smooth: { dur: 420, ease: 'cubic-bezier(.22,1,.36,1)' },
+    bouncy: { dur: 560, ease: 'cubic-bezier(.34,1.56,.64,1)' },
+    snappy: { dur: 160, ease: 'cubic-bezier(.2,0,0,1)' }
+  };
+
+  /* ===== presets/ : 스타일 팩 ===== */
+  const presets = {
+    glass: { theme: 'glass', motion: 'smooth', background: { shader: 'aurora', speed: 0.35 }, card: { glow: 'glow-soft', tilt: true }, button: { ripple: true } },
+    neon: { theme: 'neon', motion: 'bouncy', background: { shader: 'grid', speed: 0.6 }, card: { glow: 'glow-strong', tilt: true }, button: { ripple: true } },
+    minimal: { theme: 'minimal', motion: 'snappy', background: { shader: 'none' }, card: { glow: 'none', tilt: false }, button: { ripple: false } },
+    calm: { extends: 'glass', tokens: { accent: '#ffc9a8' }, card: { tilt: false }, background: { speed: 0.08 } }
+  };
+
+  /* ===== engine: extends 해석 + 깊은 병합 ===== */
+  const isObj = v => v !== null && typeof v === 'object' && !Array.isArray(v);
+  function merge(a, b) {
+    const out = { ...a };
+    for (const k of Object.keys(b)) {
+      if (isObj(b[k])) out[k] = merge(isObj(a[k]) ? a[k] : {}, b[k]);
+      else out[k] = b[k];
+    }
+    return out;
+  }
+  function resolve(name) {
+    const p = presets[name];
+    const rest = { ...p };
+    delete rest.extends;
+    return p.extends ? merge(resolve(p.extends), rest) : merge({}, rest);
+  }
+  const getPath = (o, path) => path.split('.').reduce((v, k) => (v == null ? v : v[k]), o);
+  function setPath(o, path, val) {
+    const ks = path.split('.');
+    let cur = o;
+    for (const k of ks.slice(0, -1)) { if (!isObj(cur[k])) cur[k] = {}; cur = cur[k]; }
+    cur[ks[ks.length - 1]] = val;
+  }
+  function unsetPath(o, path) {
+    const ks = path.split('.');
+    const stack = [o];
+    let cur = o;
+    for (const k of ks.slice(0, -1)) { if (!isObj(cur[k])) return; cur = cur[k]; stack.push(cur); }
+    delete cur[ks[ks.length - 1]];
+    for (let i = ks.length - 2; i >= 0; i--) {
+      const parent = stack[i], k = ks[i];
+      if (isObj(parent[k]) && !Object.keys(parent[k]).length) delete parent[k];
+    }
+  }
+  function hexRgb(hex) {
+    let h = String(hex).replace('#', '');
+    if (h.length === 3) h = h.split('').map(c => c + c).join('');
+    const n = parseInt(h, 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255].join(',');
+  }
+
+  const state = { base: 'glass', ov: {} };
+  try { const s = localStorage.getItem(KEY); if (s && presets[s]) state.base = s; } catch (e) { /* 저장소 없음 */ }
+  const flags = { tilt: true, ripple: true, motion: motions.smooth, motionName: 'smooth' };
+  const effective = () => merge(resolve(state.base), state.ov);
+
+  /* ===== effects/ShaderBackground (canvas) ===== */
+  const bg = (() => {
+    const c = $('#bg');
+    const ctx = c.getContext('2d');
+    let mode = 'none', speed = 0.25, col = {}, t = 0, last = 0, raf = 0, w = 0, h = 0;
+
+    function size() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      w = window.innerWidth; h = window.innerHeight;
+      c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      draw();
+    }
+    function line(x1, y1, x2, y2) { ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); }
+
+    function aurora() {
+      const blobs = [
+        [col.a, 0.22, 0.28, 0.55, 1.0],
+        [col.b, 0.78, 0.22, 0.6, 1.3],
+        [col.c, 0.58, 0.82, 0.5, 0.8],
+        [col.a, 0.12, 0.9, 0.42, 1.6]
+      ];
+      const big = Math.max(w, h);
+      ctx.globalCompositeOperation = 'lighter';
+      for (const [rgb, x, y, r, k] of blobs) {
+        const cx = (x + Math.sin(t * k + x * 6) * 0.12) * w;
+        const cy = (y + Math.cos(t * k * 0.8 + y * 5) * 0.1) * h;
+        const rad = r * big;
+        const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, rad);
+        g.addColorStop(0, `rgba(${rgb},0.36)`);
+        g.addColorStop(1, `rgba(${rgb},0)`);
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, w, h);
+      }
+      ctx.globalCompositeOperation = 'source-over';
+    }
+
+    function grid() {
+      const hy = h * 0.56;
+      const sky = ctx.createLinearGradient(0, hy - h * 0.3, 0, hy);
+      sky.addColorStop(0, `rgba(${col.a},0)`);
+      sky.addColorStop(1, `rgba(${col.a},0.18)`);
+      ctx.fillStyle = sky;
+      ctx.fillRect(0, hy - h * 0.3, w, h * 0.3);
+      ctx.lineWidth = 1;
+      const rows = 16, off = (t * 1.2) % 1;
+      for (let i = 0; i < rows; i++) {
+        const z = (i + off) / rows, p = z * z;
+        const y = hy + (h - hy) * p;
+        ctx.strokeStyle = `rgba(${col.a},${(0.1 + 0.55 * p).toFixed(3)})`;
+        line(0, y, w, y);
+      }
+      const cols = 14, cx = w / 2, step = w / cols;
+      ctx.strokeStyle = `rgba(${col.b},0.22)`;
+      for (let i = -cols; i <= cols; i++) line(cx + i * step * 0.06, hy, cx + i * step * 1.2, h);
+      ctx.strokeStyle = `rgba(${col.b},0.5)`;
+      line(0, hy, w, hy);
+    }
+
+    function dots() {
+      const s = 22, ox = (t * 18) % s, oy = (t * 10) % s;
+      ctx.fillStyle = `rgba(${col.a},0.13)`;
+      for (let y = -s + oy; y < h + s; y += s) {
+        for (let x = -s + ox; x < w + s; x += s) ctx.fillRect(x, y, 1.6, 1.6);
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, w, h);
+      if (mode === 'aurora') aurora();
+      else if (mode === 'grid') grid();
+      else if (mode === 'dots') dots();
+    }
+    function frame(ts) {
+      if (last) t += Math.min(0.05, (ts - last) / 1000) * speed;
+      last = ts;
+      draw();
+      raf = requestAnimationFrame(frame);
+    }
+    function stop() { cancelAnimationFrame(raf); raf = 0; }
+    function start() {
+      stop();
+      if (mode === 'none' || reduce.matches || document.hidden) { draw(); return; }
+      last = 0;
+      raf = requestAnimationFrame(frame);
+    }
+
+    window.addEventListener('resize', size);
+    document.addEventListener('visibilitychange', start);
+    if (reduce.addEventListener) reduce.addEventListener('change', start);
+    size();
+
+    return {
+      set(cfg, colors) {
+        mode = (cfg && cfg.shader) || 'none';
+        speed = cfg && typeof cfg.speed === 'number' ? cfg.speed : 0.25;
+        col = colors;
+        c.style.opacity = mode === 'none' ? '0' : '1';
+        start();
+      }
+    };
+  })();
+
+  /* ===== elements ===== */
+  const switcher = $('#switcher'), ind = $('#ind');
+  const segs = $$('.seg');
+  const mbtns = $$('.mseg');
+  const opt = { glow: $('#opt-glow'), tilt: $('#opt-tilt'), ripple: $('#opt-ripple'), bg: $('#opt-bg') };
+  const resetBtn = $('#reset'), copyBtn = $('#copy');
+  const codeEl = $('#code'), fileEl = $('#file'), resolvedEl = $('#resolved');
+  const swEl = $('#swatches'), tfileEl = $('#tfile');
+  const toastEl = $('#toast');
+  const tiltEls = $$('[data-tilt]');
+
+  /* ===== apply: 프리셋 → CSS 변수 ===== */
+  function apply(enter) {
+    const p = effective();
+    const th = themes[p.theme];
+    const vars = { ...th.vars, ...(p.tokens || {}) };
+    for (const k of Object.keys(vars)) root.style.setProperty('--' + k, vars[k]);
+    root.style.colorScheme = th.scheme;
+    root.dataset.skin = p.theme;
+
+    const g = glows[p.card && p.card.glow] || glows.none;
+    const rgb = hexRgb(vars.accent);
+    root.style.setProperty('--glow-size', g.size + 'px');
+    root.style.setProperty('--glow-color', `rgba(${rgb},${g.alpha})`);
+    root.style.setProperty('--text-glow', th.textGlow && g.alpha
+      ? `0 0 ${Math.round(g.size * 0.45)}px rgba(${rgb},${Math.min(1, g.alpha * 1.1)})`
+      : 'none');
+
+    const mName = motions[p.motion] ? p.motion : 'smooth';
+    const m = motions[mName];
+    root.style.setProperty('--dur', m.dur + 'ms');
+    root.style.setProperty('--ease', m.ease);
+
+    flags.tilt = !!(p.card && p.card.tilt);
+    flags.ripple = !!(p.button && p.button.ripple);
+    flags.motion = m;
+    flags.motionName = mName;
+    if (!flags.tilt) resetTilt();
+
+    bg.set(p.background || { shader: 'none' }, th.bgColors);
+
+    renderSwitcher();
+    renderControls(p);
+    renderCode();
+    renderResolved(p);
+    renderSwatches(p, vars);
+    if (enter) entrance();
+  }
+
+  /* ===== render ===== */
+  function placeInd() {
+    const b = segs.find(x => x.dataset.preset === state.base);
+    if (!b) return;
+    ind.style.width = b.offsetWidth + 'px';
+    ind.style.transform = `translateX(${b.offsetLeft}px)`;
+  }
+  function renderSwitcher() {
+    segs.forEach(b => {
+      const on = b.dataset.preset === state.base;
+      b.setAttribute('aria-checked', String(on));
+      b.tabIndex = on ? 0 : -1;
+    });
+    placeInd();
+  }
+  function renderControls(p) {
+    opt.glow.checked = p.card.glow !== 'none';
+    opt.tilt.checked = !!p.card.tilt;
+    opt.ripple.checked = !!p.button.ripple;
+    opt.bg.checked = ((p.background && p.background.shader) || 'none') !== 'none';
+    mbtns.forEach(b => {
+      const on = b.dataset.motion === flags.motionName;
+      b.setAttribute('aria-checked', String(on));
+      b.tabIndex = on ? 0 : -1;
+    });
+    resetBtn.disabled = Object.keys(state.ov).length === 0;
+  }
+
+  const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+  const P = s => `<span class="p">${s}</span>`;
+  function fmt(v, d) {
+    if (isObj(v)) {
+      const ks = Object.keys(v);
+      if (!ks.length) return P('{}');
+      const flat = ks.every(k => !isObj(v[k]));
+      if (d > 0 && flat && ks.length <= 3) {
+        return P('{') + ' ' + ks.map(k => `${esc(k)}${P(':')} ${fmt(v[k], d + 1)}`).join(P(',') + ' ') + ' ' + P('}');
+      }
+      const pad = '  '.repeat(d + 1), end = '  '.repeat(d);
+      return P('{') + '\n' + ks.map(k => `${pad}${esc(k)}${P(':')} ${fmt(v[k], d + 1)}${P(',')}`).join('\n') + '\n' + end + P('}');
+    }
+    if (typeof v === 'string') return `<span class="s">'${esc(v)}'</span>`;
+    return `<span class="n">${esc(v)}</span>`;
+  }
+  function renderCode() {
+    const custom = Object.keys(state.ov).length > 0;
+    const name = custom ? 'custom' : state.base;
+    const obj = custom ? merge({ extends: state.base }, state.ov) : presets[state.base];
+    fileEl.textContent = `presets/${name}.ts`;
+    codeEl.innerHTML = `<span class="k">export const</span> ${name} ${P('=')} ${fmt(obj, 0)}`;
+  }
+  function renderResolved(p) {
+    const shader = (p.background && p.background.shader) || 'none';
+    const speed = p.background && typeof p.background.speed === 'number' ? p.background.speed : 0.25;
+    const items = [
+      ['theme', p.theme, 'theme'],
+      ['motion', flags.motionName, 'motion'],
+      ['glow', p.card.glow, 'card.glow'],
+      ['tilt', p.card.tilt ? 'on' : 'off', 'card.tilt'],
+      ['ripple', p.button.ripple ? 'on' : 'off', 'button.ripple'],
+      ['bg', shader === 'none' ? 'none' : `${shader} ×${speed}`, 'background.shader']
+    ];
+    resolvedEl.innerHTML = items.map(([k, v, path]) => {
+      const changed = getPath(state.ov, path) !== undefined;
+      return `<span class="rchip${changed ? ' changed' : ''}">${k} <b>${esc(v)}</b></span>`;
+    }).join('');
+  }
+  const SW = ['bg', 'surface', 'fg', 'muted', 'accent', 'accent-2', 'radius', 'font-display'];
+  function renderSwatches(p, vars) {
+    tfileEl.textContent = `themes/${p.theme}`;
+    swEl.replaceChildren(...SW.map(k => {
+      const v = String(vars[k]);
+      const row = document.createElement('div');
+      row.className = 'sw' + (p.tokens && k in p.tokens ? ' changed' : '');
+      const chip = document.createElement('i');
+      if (k === 'radius') { chip.className = 'r'; chip.style.borderRadius = v; }
+      else if (k === 'font-display') { chip.className = 'f'; chip.style.fontFamily = v; chip.textContent = '가'; }
+      else chip.style.background = v;
+      const name = document.createElement('b');
+      name.textContent = '--' + k;
+      const val = document.createElement('span');
+      const shown = k === 'font-display' ? v.split(',')[0].replace(/"/g, '') : v;
+      val.textContent = shown;
+      val.title = shown;
+      row.append(chip, name, val);
+      return row;
+    }));
+  }
+
+  /* ===== motion: 등장 애니메이션 ===== */
+  function entrance() {
+    if (reduce.matches) return;
+    const m = flags.motion;
+    $$('.window, .window .stat, .window .panel, .inspector .ins').forEach((el, i) => {
+      el.animate(
+        [{ opacity: 0.25, transform: 'translateY(14px) scale(.985)' }, { opacity: 1, transform: 'translateY(0) scale(1)' }],
+        { duration: m.dur + 120, easing: m.ease, delay: i * 45, fill: 'backwards' }
+      );
+    });
+  }
+
+  /* ===== effects: tilt + sheen ===== */
+  function resetTilt() {
+    tiltEls.forEach(el => {
+      el.classList.remove('tilting');
+      el.style.setProperty('--rx', '0deg');
+      el.style.setProperty('--ry', '0deg');
+    });
+  }
+  tiltEls.forEach(el => {
+    const max = Number(el.dataset.tilt) || 6;
+    el.addEventListener('pointermove', e => {
+      const r = el.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+      el.style.setProperty('--mx', (x * 100).toFixed(1) + '%');
+      el.style.setProperty('--my', (y * 100).toFixed(1) + '%');
+      if (!flags.tilt || reduce.matches) return;
+      el.classList.add('tilting');
+      el.style.setProperty('--rx', ((0.5 - y) * max).toFixed(2) + 'deg');
+      el.style.setProperty('--ry', ((x - 0.5) * max).toFixed(2) + 'deg');
+    });
+    el.addEventListener('pointerleave', () => {
+      el.classList.remove('tilting');
+      el.style.setProperty('--rx', '0deg');
+      el.style.setProperty('--ry', '0deg');
+    });
+  });
+
+  /* ===== effects: ripple ===== */
+  $$('[data-ripple]').forEach(btn => {
+    btn.addEventListener('pointerdown', e => {
+      if (!flags.ripple || reduce.matches) return;
+      const r = btn.getBoundingClientRect();
+      const d = Math.max(r.width, r.height) * 2;
+      const s = document.createElement('span');
+      s.className = 'ripple';
+      s.style.width = s.style.height = d + 'px';
+      s.style.left = (e.clientX - r.left - d / 2) + 'px';
+      s.style.top = (e.clientY - r.top - d / 2) + 'px';
+      btn.appendChild(s);
+      const a = s.animate(
+        [{ transform: 'scale(0)', opacity: 0.4 }, { transform: 'scale(1)', opacity: 0 }],
+        { duration: Math.max(480, flags.motion.dur * 1.4), easing: 'cubic-bezier(.2,.6,.3,1)' }
+      );
+      a.onfinish = () => s.remove();
+    });
+  });
+
+  /* ===== toast ===== */
+  let toastTimer = 0;
+  function toast(msg) {
+    const m = flags.motion;
+    const small = document.createElement('small');
+    small.textContent = `motion/${flags.motionName} · ${m.dur}ms`;
+    toastEl.replaceChildren(document.createTextNode(msg), small);
+    toastEl.hidden = false;
+    if (!reduce.matches) {
+      toastEl.animate(
+        [{ transform: 'translate(-50%, 24px)', opacity: 0 }, { transform: 'translate(-50%, 0)', opacity: 1 }],
+        { duration: m.dur + 80, easing: m.ease }
+      );
+    }
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      if (reduce.matches) { toastEl.hidden = true; return; }
+      const a = toastEl.animate(
+        [{ transform: 'translate(-50%, 0)', opacity: 1 }, { transform: 'translate(-50%, 12px)', opacity: 0 }],
+        { duration: 200, easing: 'ease-in' }
+      );
+      a.onfinish = () => { toastEl.hidden = true; };
+    }, 2400);
+  }
+
+  /* ===== controls ===== */
+  function choose(name) {
+    if (name === state.base && !Object.keys(state.ov).length) return;
+    state.base = name;
+    state.ov = {};
+    try { localStorage.setItem(KEY, name); } catch (e) { /* 저장소 없음 */ }
+    apply(true);
+  }
+  function override(path, val, enter) {
+    const baseVal = getPath(resolve(state.base), path);
+    if (JSON.stringify(baseVal) === JSON.stringify(val)) unsetPath(state.ov, path);
+    else setPath(state.ov, path, val);
+    apply(!!enter);
+  }
+
+  segs.forEach(b => b.addEventListener('click', () => choose(b.dataset.preset)));
+  mbtns.forEach(b => b.addEventListener('click', () => override('motion', b.dataset.motion, true)));
+
+  function radioKeys(group, items, pick) {
+    group.addEventListener('keydown', e => {
+      const i = items.indexOf(document.activeElement);
+      if (i < 0) return;
+      let j = null;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') j = (i + 1) % items.length;
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') j = (i - 1 + items.length) % items.length;
+      if (j === null) return;
+      e.preventDefault();
+      pick(items[j]);
+      items[j].focus();
+    });
+  }
+  radioKeys(switcher, segs, b => choose(b.dataset.preset));
+  radioKeys($('#motion'), mbtns, b => override('motion', b.dataset.motion, true));
+
+  opt.glow.addEventListener('change', e => {
+    const b = getPath(resolve(state.base), 'card.glow');
+    override('card.glow', e.target.checked ? (b && b !== 'none' ? b : 'glow-soft') : 'none');
+  });
+  opt.tilt.addEventListener('change', e => override('card.tilt', e.target.checked));
+  opt.ripple.addEventListener('change', e => override('button.ripple', e.target.checked));
+  opt.bg.addEventListener('change', e => {
+    const base = resolve(state.base);
+    const bs = (base.background && base.background.shader) || 'none';
+    override('background.shader', e.target.checked ? (bs !== 'none' ? bs : themes[base.theme].shader) : 'none');
+  });
+  resetBtn.addEventListener('click', () => { state.ov = {}; apply(true); });
+
+  $('#run').addEventListener('click', () => toast('빌드를 시작했어요'));
+  $('#replay').addEventListener('click', entrance);
+
+  copyBtn.addEventListener('click', () => {
+    const txt = codeEl.textContent;
+    const label = (t) => { copyBtn.textContent = t; setTimeout(() => { copyBtn.textContent = '복사'; }, 1600); };
+    const fallback = () => {
+      const range = document.createRange();
+      range.selectNodeContents(codeEl);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      label('선택됨 · 직접 복사');
+    };
+    try {
+      navigator.clipboard.writeText(txt).then(() => label('복사했어요'), fallback);
+    } catch (e) { fallback(); }
+  });
+
+  /* ===== boot ===== */
+  apply(false);
+  requestAnimationFrame(() => requestAnimationFrame(() => switcher.classList.remove('no-anim')));
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(placeInd);
+  if ('ResizeObserver' in window) new ResizeObserver(() => placeInd()).observe(switcher);
+  else window.addEventListener('resize', placeInd);
+})();
+</script>
+</body>
+</html>
