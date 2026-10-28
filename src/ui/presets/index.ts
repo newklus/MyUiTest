@@ -28,6 +28,27 @@ export const presets = {
     card: { glow: 'none', tilt: false },
     button: { ripple: false },
   },
+  terminal: {
+    theme: 'terminal',
+    motion: 'stepped',
+    background: { shader: 'phosphor', speed: 1, overlay: 'scanlines' },
+    card: { glow: 'glow-soft', tilt: false },
+    button: { ripple: false },
+  },
+  brutal: {
+    theme: 'brutal',
+    motion: 'snappy',
+    background: { shader: 'none' },
+    card: { glow: 'none', tilt: false },
+    button: { ripple: false, press: true },
+  },
+  clay: {
+    theme: 'clay',
+    motion: 'bouncy',
+    background: { shader: 'blobs', speed: 0.25, overlay: 'grain' },
+    card: { glow: 'none', tilt: true },
+    button: { ripple: true },
+  },
   /** 상속 예시: glass를 물려받고 accent 색, 틸트, 배경 속도만 바꿉니다. */
   calm: {
     extends: 'glass',

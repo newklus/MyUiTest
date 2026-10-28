@@ -10,7 +10,7 @@ interface Params {
 }
 
 /**
- * 프리셋의 background 설정을 따라 창 뒤에 그리는 배경 (aurora / grid / dots).
+ * 프리셋의 background 설정을 따라 창 뒤에 그리는 배경 (aurora / grid / dots / phosphor / blobs).
  * 앱 최상단에 한 번만 두세요. 탭이 숨겨지거나 '동작 줄이기'가 켜져 있으면 멈춥니다.
  */
 export function ShaderBackground({ className }: { className?: string }) {
@@ -93,12 +93,67 @@ export function ShaderBackground({ className }: { className?: string }) {
       }
     };
 
+    // 0~1 사이의 고정 난수 (같은 i, seed면 같은 값)
+    const hash = (i: number, seed: number) => {
+      const x = Math.sin(i * 12.9898 + seed * 78.233) * 43758.5453;
+      return x - Math.floor(x);
+    };
+
+    /** CRT 형광: 가운데 번짐 + 위에서 아래로 지나가는 밝은 띠 + 깜빡이는 점 */
+    const phosphor = ([a, , c]: Params['colors']) => {
+      const glow = ctx.createRadialGradient(w / 2, h * 0.45, 0, w / 2, h * 0.45, Math.max(w, h) * 0.7);
+      glow.addColorStop(0, `rgba(${a},0.11)`);
+      glow.addColorStop(1, `rgba(${a},0)`);
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, w, h);
+
+      const by = (((t * 0.12) % 1.3) - 0.15) * h;
+      const band = ctx.createLinearGradient(0, by - 90, 0, by + 90);
+      band.addColorStop(0, `rgba(${a},0)`);
+      band.addColorStop(0.5, `rgba(${a},0.08)`);
+      band.addColorStop(1, `rgba(${a},0)`);
+      ctx.fillStyle = band;
+      ctx.fillRect(0, by - 90, w, 180);
+
+      const seed = Math.floor(t * 6);
+      for (let i = 0; i < 48; i++) {
+        const on = hash(i, seed) > 0.55;
+        ctx.fillStyle = `rgba(${i % 7 === 0 ? c : a},${on ? 0.5 : 0.14})`;
+        ctx.fillRect(Math.floor(hash(i, 1) * w), Math.floor(hash(i, 2) * h), 2, 2);
+      }
+    };
+
+    /** 파스텔 덩어리가 천천히 떠다닙니다. 밝은 배경용 (빛 더하기 합성 없이) */
+    const blobs = ([a, b, c]: Params['colors']) => {
+      const big = Math.min(w, h);
+      const items: Array<[string, number, number, number, number]> = [
+        [a, 0.18, 0.24, 0.42, 0.7],
+        [b, 0.82, 0.3, 0.36, 1.1],
+        [c, 0.62, 0.82, 0.46, 0.9],
+        [b, 0.12, 0.86, 0.3, 1.4],
+      ];
+      for (const [rgb, x, y, r, k] of items) {
+        const cx = (x + Math.sin(t * k + x * 4) * 0.07) * w;
+        const cy = (y + Math.cos(t * k * 0.9 + y * 3) * 0.07) * h;
+        const rad = r * big * (1 + Math.sin(t * k * 1.3) * 0.06);
+        const g = ctx.createRadialGradient(cx, cy, rad * 0.15, cx, cy, rad);
+        g.addColorStop(0, `rgba(${rgb},0.5)`);
+        g.addColorStop(1, `rgba(${rgb},0)`);
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(cx, cy, rad, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    };
+
     const draw = () => {
       ctx.clearRect(0, 0, w, h);
       const { shader, colors } = params.current;
       if (shader === 'aurora') aurora(colors);
       else if (shader === 'grid') grid(colors);
       else if (shader === 'dots') dots(colors);
+      else if (shader === 'phosphor') phosphor(colors);
+      else if (shader === 'blobs') blobs(colors);
     };
     const frame = (ts: number) => {
       if (last) t += Math.min(0.05, (ts - last) / 1000) * params.current.speed;

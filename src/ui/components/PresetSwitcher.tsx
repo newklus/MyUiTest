@@ -11,10 +11,13 @@ export interface PresetItem {
 export function PresetSwitcher({
   items,
   label = '스타일 팩',
+  minItemWidth = 92,
   className,
 }: {
   items?: PresetItem[];
   label?: string;
+  /** 한 칸의 최소 너비(px). 공간이 모자라면 다음 줄로 넘어갑니다. */
+  minItemWidth?: number;
   className?: string;
 }) {
   const { name, presets, setPreset } = useUI();
@@ -35,7 +38,8 @@ export function PresetSwitcher({
         return;
       }
       ind.style.width = `${btn.offsetWidth}px`;
-      ind.style.transform = `translateX(${btn.offsetLeft}px)`;
+      ind.style.height = `${btn.offsetHeight}px`;
+      ind.style.transform = `translate(${btn.offsetLeft}px, ${btn.offsetTop}px)`;
       ind.style.opacity = '1';
     };
     place();
@@ -65,13 +69,14 @@ export function PresetSwitcher({
       role="radiogroup"
       aria-label={label}
       onKeyDown={onKeyDown}
-      className={cn('relative grid gap-0.5 rounded-ui-sm border border-line bg-surface p-1 ui-backdrop transition', className)}
-      style={{ gridTemplateColumns: `repeat(${list.length}, minmax(0, 1fr))` }}
+      className={cn('relative grid gap-0.5 rounded-ui-sm ui-border border-line bg-surface p-1 ui-backdrop transition', className)}
+      // 칸이 좁아지면 여러 줄로 감깁니다. 선택 표시는 버튼 위치(가로·세로)를 따라갑니다.
+      style={{ gridTemplateColumns: `repeat(auto-fit, minmax(${minItemWidth}px, 1fr))` }}
     >
       <span
         ref={indRef}
         aria-hidden="true"
-        className={cn('absolute top-1 bottom-1 left-0 rounded-ui-xs bg-accent glow-sm opacity-0', animated && 'transition-all')}
+        className={cn('absolute top-0 left-0 rounded-ui-xs bg-accent glow-sm opacity-0', animated && 'transition-all')}
       />
       {list.map((it, i) => {
         const on = i === index;

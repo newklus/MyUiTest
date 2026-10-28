@@ -6,9 +6,9 @@ export const DEFAULT_CONFIG: PresetConfig = {
   theme: 'glass',
   motion: 'smooth',
   tokens: {},
-  background: { shader: 'none', speed: 0.25 },
+  background: { shader: 'none', speed: 0.25, overlay: 'none' },
   card: { glow: 'none', tilt: false },
-  button: { ripple: false },
+  button: { ripple: false, press: false },
   window: { windows: [], macos: [] },
 };
 

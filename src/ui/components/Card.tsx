@@ -33,7 +33,7 @@ export function Card({ glow, tilt, tiltMax = 6, className, style, children, ...r
       ref={ref}
       style={glowName ? { ...glowVars(glowName), ...style } : style}
       className={cn(
-        'relative rounded-ui border border-line bg-surface ui-backdrop glow transition',
+        'relative rounded-ui ui-border border-line bg-surface ui-backdrop glow transition',
         tiltOn && 'tilt sheen data-tilting:duration-75 data-tilting:ease-linear',
         className,
       )}

@@ -6,6 +6,7 @@ export type {
   DeepPartial,
   GlowName,
   MotionName,
+  OverlayName,
   PresetConfig,
   PresetDef,
   Scheme,
@@ -16,7 +17,7 @@ export type {
 } from './engine/types';
 
 // data
-export { themes, glass, neon, minimal } from './themes';
+export { themes, glass, neon, minimal, terminal, brutal, clay } from './themes';
 export { presets, type PresetName } from './presets';
 export { motionPresets, type MotionPreset } from './motion/presets';
 export { glows, glowVars } from './effects/glows';

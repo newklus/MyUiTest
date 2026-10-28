@@ -1,7 +1,9 @@
 export type Scheme = 'dark' | 'light';
 export type GlowName = 'glow-soft' | 'glow-strong' | 'none';
-export type MotionName = 'smooth' | 'bouncy' | 'snappy';
-export type ShaderName = 'aurora' | 'grid' | 'dots' | 'none';
+export type MotionName = 'smooth' | 'bouncy' | 'snappy' | 'stepped';
+export type ShaderName = 'aurora' | 'grid' | 'dots' | 'phosphor' | 'blobs' | 'none';
+/** 화면 전체 위에 얹는 질감 (클릭은 통과합니다) */
+export type OverlayName = 'none' | 'scanlines' | 'grain';
 
 /**
  * Tauri 2 창 효과 이름 (Rust의 WindowEffect, camelCase).
@@ -33,8 +35,12 @@ export interface Tokens {
   track: string;
   codeBg: string;
   radius: string;
+  /** 카드·버튼·입력창 같은 개체의 테두리 두께 (구분선은 항상 1px) */
+  borderWidth: string;
   backdrop: string;
   shadow: string;
+  /** button.press가 켜졌을 때 버튼이 눌리며 움직이는 거리 */
+  pressShift: string;
   /** 틸트 카드 위 하이라이트 세기 (0~1) */
   sheen: string;
   fontDisplay: string;
@@ -61,9 +67,10 @@ export interface PresetConfig {
   motion: MotionName;
   /** 테마 토큰 일부만 덮어쓰기 */
   tokens: Partial<Tokens>;
-  background: { shader: ShaderName; speed: number };
+  background: { shader: ShaderName; speed: number; overlay: OverlayName };
   card: { glow: GlowName; tilt: boolean };
-  button: { ripple: boolean };
+  /** press: 누르면 그림자 쪽으로 들어가는 효과 (딱딱한 그림자 테마용) */
+  button: { ripple: boolean; press: boolean };
   /** 운영체제별 네이티브 창 효과. 앞쪽 항목이 우선이고, 빈 배열이면 끕니다. Linux는 지원하지 않습니다. */
   window: { windows: WindowEffectName[]; macos: WindowEffectName[] };
 }
