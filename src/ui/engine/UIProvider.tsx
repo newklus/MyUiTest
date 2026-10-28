@@ -59,7 +59,10 @@ export function UIProvider({
 
   // 1) 토큰 → CSS 변수. 페인트 전에 적용해서 깜빡임이 없게 합니다.
   useLayoutEffect(() => {
-    applyVars(document.documentElement, buildVars(config, theme, { windowEffects: effectsActive }), theme.scheme);
+    applyVars(document.documentElement, buildVars(config, theme, { windowEffects: effectsActive }), {
+      scheme: theme.scheme,
+      overlay: config.background.overlay,
+    });
   }, [config, theme, effectsActive]);
 
   // 2) 네이티브 창 효과 (Tauri에서만 동작). 다른 항목을 덮어쓸 때 다시 호출되지 않도록 문자열로 비교합니다.

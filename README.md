@@ -4,11 +4,45 @@
 컴포넌트는 Tailwind 클래스만 쓰고, 실제 값은 엔진이 `<html>`에 쓰는 `--ui-*` CSS 변수가 정합니다.
 **추가 패키지는 없습니다.** react, @tauri-apps/api, tailwindcss v4만 씁니다.
 
-| glass | neon (틸트만 끈 커스텀) | minimal |
+| glass | neon | minimal |
 | --- | --- | --- |
-| ![glass](docs/screenshots/glass.png) | ![neon](docs/screenshots/neon-custom.png) | ![minimal](docs/screenshots/minimal.png) |
+| ![glass](docs/screenshots/glass.jpg) | ![neon](docs/screenshots/neon.jpg) | ![minimal](docs/screenshots/minimal.jpg) |
+| **terminal** | **brutal** | **clay** |
+| ![terminal](docs/screenshots/terminal.jpg) | ![brutal](docs/screenshots/brutal.jpg) | ![clay](docs/screenshots/clay.jpg) |
+| **macos** · 맥OS 느낌 | **goryeo** · 중세 한국 | **cyber** · 사이버펑크 |
+| ![macos](docs/screenshots/macos.jpg) | ![goryeo](docs/screenshots/goryeo.jpg) | ![cyber](docs/screenshots/cyber.jpg) |
+| **forest** · 숲속 | **fantasy** · 판타지 | **steampunk** · 스팀펑크 |
+| ![forest](docs/screenshots/forest.jpg) | ![fantasy](docs/screenshots/fantasy.jpg) | ![steampunk](docs/screenshots/steampunk.jpg) |
 
-빌드 없이 바로 보려면 `demo/preset-demo.html`을 브라우저로 여세요. 같은 개념을 순수 JS로 만든 첫 데모입니다.
+빌드 없이 바로 보려면 `demo/preset-demo.html`을 브라우저로 여세요. `src/`의 React 데모를 한 파일로 빌드한 것입니다.
+
+## 템플릿 (스타일 팩)
+
+| 팩 | 테마 | 모션 | 배경 · 오버레이 | 이펙트 | 창 효과 |
+| --- | --- | --- | --- | --- | --- |
+| `glass` | 반투명 유리, 블러 | smooth | aurora | 글로우, 틸트, 리플 | mica · Liquid Glass |
+| `neon` | 각진 모서리, 강한 발광 | bouncy | grid | 강한 글로우, 틸트, 리플 | 없음 |
+| `minimal` | 밝은 바탕, 얇은 선 | snappy | 없음 | 없음 | 없음 |
+| `terminal` | 초록 형광 CRT, 고정폭 한글 | stepped | phosphor · scanlines | 글로우 | 없음 |
+| `brutal` | 2px 검은 테두리, 딱딱한 그림자, 원색 | snappy | 없음 | 누르기 | 없음 |
+| `clay` | 파스텔, 큰 모서리, 겹친 그림자 | bouncy | blobs · grain | 틸트, 리플 | 없음 |
+| `macos` | 흰 반투명 유리, 강한 블러, 시스템 글꼴, 파란 강조 | smooth | blobs (파스텔) | 없음 | mica(밝게) · Liquid Glass |
+| `goryeo` | 한지 바탕, 먹빛 글자, 청자색 강조, Song Myung 글꼴 | smooth | ink(수묵 산수) · grain | 붉은 안쪽 테두리 | 없음 |
+| `cyber` | 형광 노랑 · 청록 · 마젠타, 깎인 모서리, Orbitron 글꼴 | snappy | rain(네온 도시) · scanlines | HUD 모서리 괄호, 글로우, 틸트 | 없음 |
+| `forest` | 밤 숲 이끼색 유리, 연두 · 호박색, Hahmlet 글꼴 | smooth | fireflies(반딧불 · 빛줄기) | 글로우, 틸트, 리플 | 없음 |
+| `fantasy` | 남보라 밤하늘, 금빛 강조, Cinzel 글꼴 | smooth | stars(별 · 성운 · 별똥별) | 금색 모서리 장식, 글로우, 틸트 | 없음 |
+| `steampunk` | 가죽색 바탕, 황동 · 녹청, 2px 테두리, 타자기 글꼴 | snappy | gears(톱니바퀴) · grain | 리벳 | 없음 |
+| `calm` | glass 상속, accent만 살구색 | smooth | aurora (느리게) | 글로우, 리플 | mica · Liquid Glass |
+
+각 레이어에서 고를 수 있는 값:
+
+- **모션**: `smooth` `bouncy` `snappy` `stepped`(계단식으로 끊기는 움직임)
+- **배경 셰이더** `background.shader`: `aurora` `grid` `dots` `phosphor` `blobs` `ink` `rain` `fireflies` `stars` `gears` `none`
+- **오버레이** `background.overlay`: `scanlines` `grain` `none`. 화면 맨 위에 얹히고 클릭은 통과합니다.
+- **이펙트**: `card.glow`, `card.tilt`, `card.decor`(`frame` 안쪽 테두리 · `corners` 모서리 괄호 · `rivets` 리벳), `button.ripple`, `button.press`(누르면 그림자 쪽으로 들어감)
+- **토큰**: 색 · 모서리 · 글꼴 외에 `borderWidth`(개체 테두리 두께), `pressShift`(누를 때 움직이는 거리), `decor`(장식 색), `clip`(카드 · 버튼 외곽을 자르는 clip-path, 사이버펑크의 깎인 모서리)
+
+라틴 문자용 글꼴 뒤에 한글 글꼴을 이어 쓰는 테마(`cyber`의 Orbitron → Do Hyeon, `fantasy`의 Cinzel → Hahmlet 등)는 영문과 한글이 서로 다른 글꼴로 나옵니다. 한글 글꼴에 없는 굵기를 브라우저가 가짜로 만들지 않도록 제목 클래스에 `font-synthesis: none`을 걸어 두었습니다.
 
 ## 구성
 
@@ -16,16 +50,16 @@
 src/ui/
 ├─ ui.css               Tailwind 연결 (@theme inline, 이펙트 유틸리티)
 ├─ engine/              UIProvider, useUI, extends 상속 해석, CSS 변수 적용
-├─ themes/              glass · neon · minimal 토큰 세트
+├─ themes/              12개 테마 토큰 세트 (glass … steampunk)
 ├─ presets/             스타일 팩 (calm = glass 상속 예시)
 ├─ effects/             useTilt, useRipple, ShaderBackground, 글로우 프리셋
-├─ motion/              smooth · bouncy · snappy, <Stagger>/<Reveal>
+├─ motion/              smooth · bouncy · snappy · stepped, <Stagger>/<Reveal>
 ├─ components/          Card, Button, Switch, Chip, PresetSwitcher
 ├─ tauri/               Titlebar, 창 효과(mica · vibrancy · Liquid Glass)
 └─ dev/PresetInspector  레이어 조절 + 프리셋 코드 복사 (개발용)
 src/App.tsx             사용 예시 화면
 tauri-snippets/         tauri.conf.json, macOS 설정, 권한
-demo/preset-demo.html   빌드 없이 여는 순수 JS 데모
+demo/preset-demo.html   빌드 없이 여는 한 파일짜리 데모
 docs/screenshots/       README 스크린샷
 ```
 
@@ -77,9 +111,9 @@ Tauri 창 효과까지 보려면 아래 2~3단계를 기존 Tauri 프로젝트�
 | 종류 | 클래스 |
 | --- | --- |
 | 색 | `bg-bg` `bg-surface` `bg-surface-2` `border-line` `text-fg` `text-muted` `bg-accent` `text-accent-2` `text-on-accent` `text-ok` `bg-track` `bg-code` (모두 `/15` 같은 투명도 가능) |
-| 모서리 | `rounded-ui` `rounded-ui-sm` `rounded-ui-xs` |
+| 모서리 · 테두리 | `rounded-ui` `rounded-ui-sm` `rounded-ui-xs`, `ui-border`(두께는 borderWidth 토큰, 색은 `border-line` 등으로 따로), `ui-clip`(clip 토큰) |
 | 글꼴 | `type-display` `type-heading` `label-caps` `font-body` `font-mono` |
-| 이펙트 | `glow` `glow-sm` `text-glow` `ui-backdrop` `ui-shadow`, `tilt sheen`(useTilt와 함께) |
+| 이펙트 | `glow` `glow-sm` `text-glow` `ui-backdrop` `ui-shadow` `press`, `tilt sheen`(useTilt와 함께) |
 | 모션 | `transition`, `transition-colors` 등은 자동으로 프리셋 속도·곡선을 따릅니다. `ease-ui`도 있어요 |
 | 명암 | `dark:` 접두사가 OS 설정 대신 프리셋 명암을 따릅니다. 앱에 이미 dark 변형을 정의했다면 `ui.css`의 `@custom-variant` 줄을 지우세요 |
 
@@ -131,7 +165,7 @@ export const myPresets = {
 
 ## 알아둘 점
 
-- **폰트**: 데모의 `index.html`은 Google Fonts를 링크합니다. 데스크톱 앱은 오프라인일 수 있고 Tauri CSP에 막힐 수 있으니, 실제 앱에서는 폰트 파일을 번들에 넣으세요(@fontsource 패키지 또는 woff2 + `@font-face`). 없으면 맑은 고딕·Apple SD 고딕으로 대체됩니다. 한글 폰트는 용량이 크니 쓰는 굵기만 넣으세요.
+- **폰트**: 데모의 `index.html`은 Google Fonts(Gothic A1, IBM Plex Sans KR, Orbit, Nanum Gothic Coding, Black Han Sans, Jua, Gowun Dodum, Gowun Batang, Song Myung, Do Hyeon, Orbitron, Cinzel, Hahmlet, Playfair Display, Nanum Myeongjo, Special Elite, JetBrains Mono)를 링크합니다. 실제 앱에서는 고른 팩에 필요한 글꼴만 넣으세요. `macos` 팩은 시스템 글꼴을 써서 macOS에서는 SF가, 다른 운영체제에서는 IBM Plex Sans KR이 나옵니다. 데스크톱 앱은 오프라인일 수 있고 Tauri CSP에 막힐 수 있으니, 실제 앱에서는 폰트 파일을 번들에 넣으세요(@fontsource 패키지 또는 woff2 + `@font-face`). 없으면 맑은 고딕·Apple SD 고딕으로 대체됩니다. 한글 폰트는 용량이 크니 쓰는 굵기만 넣으세요.
 - **성능**: Linux(WebKitGTK)는 `backdrop-filter`와 캔버스 배경이 무거울 수 있어요. 필요하면 Linux에서는 minimal 같은 팩을 기본으로 고르세요.
 - **저장**: 선택한 팩은 localStorage(`storageKey`)에 저장됩니다. Tauri store 플러그인으로 바꾸려면 `UIProvider.tsx`의 load/save만 교체하면 됩니다.
 - **접근성**: OS의 '동작 줄이기'가 켜져 있으면 틸트, 리플, 등장 애니메이션, 배경 애니메이션이 멈춥니다.
@@ -139,4 +173,4 @@ export const myPresets = {
 
 ## 확인한 범위
 
-Tailwind CSS 4.3.3으로 CSS를 컴파일하고, React 19.2 + TypeScript 6.0으로 타입 검사를 했습니다. Tauri API는 2.12.4 소스를 기준으로 맞췄고, Chromium에서 네 가지 팩과 좁은 창 레이아웃을 렌더해 봤습니다. 실제 Tauri 창에서의 mica·vibrancy는 이 환경에서 실행할 수 없어 확인하지 못했습니다.
+Tailwind CSS 4.3.3으로 CSS를 컴파일하고, React 19.2 + TypeScript 6.0으로 타입 검사를 했습니다. Tauri API는 2.12.4 소스를 기준으로 맞췄고, Chromium에서 열세 가지 팩을 실제 글꼴로 렌더하고 좁은 창 레이아웃과 brutal 버튼의 누르기 효과를 확인했습니다. 실제 Tauri 창에서의 mica·vibrancy는 이 환경에서 실행할 수 없어 확인하지 못했습니다.

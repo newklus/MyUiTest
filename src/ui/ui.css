@@ -58,8 +58,12 @@
     --ui-track: rgba(255, 255, 255, 0.14);
     --ui-code-bg: rgba(5, 9, 28, 0.5);
     --ui-radius: 20px;
+    --ui-border-width: 1px;
     --ui-backdrop: blur(18px) saturate(150%);
     --ui-shadow: 0 14px 40px rgba(2, 6, 23, 0.45);
+    --ui-press-shift: 0px;
+    --ui-decor: transparent;
+    --ui-clip: none;
     --ui-sheen: 0.16;
     --ui-font-display: "Gothic A1", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
     --ui-font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
@@ -96,9 +100,46 @@
       animation-iteration-count: 1 !important;
     }
   }
+
+  /* 오버레이: 프리셋의 background.overlay. 화면 맨 위에 얹히고 클릭은 통과합니다. */
+  [data-overlay="scanlines"] body::after,
+  [data-overlay="grain"] body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+  }
+  [data-overlay="scanlines"] body::after {
+    background: repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.26) 0 1px, transparent 1px 3px);
+  }
+  [data-overlay="grain"] body::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.2 0 0 0 0 0.2 0 0 0 0 0.3 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.22;
+  }
 }
 
 /* ---------- 3. 이펙트 유틸리티 ---------- */
+
+/* 개체 테두리. 두께는 테마 토큰(borderWidth), 색은 border-line 같은 색 클래스로 따로 줍니다. */
+@utility ui-border {
+  border-style: solid;
+  border-width: var(--ui-border-width);
+}
+
+/* 누르면 그림자 쪽으로 들어가는 버튼 (Button이 button.press일 때 붙입니다) */
+@utility press {
+  &:active {
+    translate: var(--ui-press-shift) var(--ui-press-shift);
+    box-shadow: none;
+  }
+}
+
+/* 테마의 clip 토큰으로 외곽을 자릅니다 (예: 사이버펑크의 깎인 모서리). 기본값 none이면 아무 일도 없습니다. */
+@utility ui-clip {
+  clip-path: var(--ui-clip);
+}
+
 @utility ui-backdrop {
   -webkit-backdrop-filter: var(--ui-backdrop);
   backdrop-filter: var(--ui-backdrop);
@@ -150,14 +191,17 @@
 }
 
 /* 타이포 역할. 글꼴과 굵기가 테마마다 달라서 클래스 하나로 묶었습니다. */
+/* 섞어 쓰는 글꼴(라틴 + 한글 대체 글꼴)에 없는 굵기를 브라우저가 가짜로 만들지 않게 합니다. */
 @utility type-display {
   font-family: var(--ui-font-display);
   font-weight: var(--ui-display-weight);
+  font-synthesis: none;
 }
 
 @utility type-heading {
   font-family: var(--ui-font-display);
   font-weight: var(--ui-heading-weight);
+  font-synthesis: none;
 }
 
 @utility label-caps {
@@ -168,8 +212,37 @@
   letter-spacing: var(--ui-label-tracking);
 }
 
-/* useRipple()이 버튼 안에 만드는 원 */
+/* useRipple()이 버튼 안에 만드는 원, Card의 data-decor 장식 */
 @layer components {
+  [data-decor]::before {
+    content: "";
+    position: absolute;
+    inset: 6px;
+    pointer-events: none;
+    border-radius: max(0px, calc(var(--ui-radius) - 6px));
+  }
+  [data-decor="frame"]::before {
+    border: 1px solid var(--ui-decor);
+  }
+  [data-decor="corners"]::before {
+    --c: linear-gradient(var(--ui-decor), var(--ui-decor));
+    border-radius: 0;
+    background:
+      var(--c) top left / 16px 2px, var(--c) top left / 2px 16px,
+      var(--c) top right / 16px 2px, var(--c) top right / 2px 16px,
+      var(--c) bottom left / 16px 2px, var(--c) bottom left / 2px 16px,
+      var(--c) bottom right / 16px 2px, var(--c) bottom right / 2px 16px;
+    background-repeat: no-repeat;
+  }
+  [data-decor="rivets"]::before {
+    --r: radial-gradient(circle at 40% 40%, rgb(255 255 255 / 0.55) 0 1px, var(--ui-decor) 1.6px 3px, rgb(0 0 0 / 0.4) 3.3px 3.9px, transparent 4.2px);
+    border-radius: 0;
+    background:
+      var(--r) top left / 10px 10px, var(--r) top right / 10px 10px,
+      var(--r) bottom left / 10px 10px, var(--r) bottom right / 10px 10px;
+    background-repeat: no-repeat;
+  }
+
   .ui-ripple {
     position: absolute;
     border-radius: 9999px;

@@ -33,7 +33,7 @@ function PanelHead({ title, children }: { title: string; children?: ReactNode })
 }
 
 const smallBtn =
-  'cursor-pointer rounded-ui-xs border border-line px-2.5 py-1.5 text-xs font-medium transition hover:border-accent disabled:cursor-default disabled:opacity-40 disabled:hover:border-line focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent';
+  'cursor-pointer rounded-ui-xs ui-border border-line px-2.5 py-1.5 text-xs font-medium transition hover:border-accent disabled:cursor-default disabled:opacity-40 disabled:hover:border-line focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent';
 
 function LayerControls() {
   const { name, presets, theme, config, overrides, override, resetOverrides } = useUI();
@@ -50,6 +50,7 @@ function LayerControls() {
     },
     { id: 'opt-tilt', label: '틸트', path: 'card.tilt', on: config.card.tilt, set: (on) => override('card.tilt', on) },
     { id: 'opt-ripple', label: '리플', path: 'button.ripple', on: config.button.ripple, set: (on) => override('button.ripple', on) },
+    { id: 'opt-press', label: '누르기', path: 'button.press', on: config.button.press, set: (on) => override('button.press', on) },
     {
       id: 'opt-bg',
       label: '배경 셰이더',
@@ -57,6 +58,21 @@ function LayerControls() {
       on: config.background.shader !== 'none',
       set: (on) =>
         override('background.shader', on ? (base.background.shader !== 'none' ? base.background.shader : theme.shader) : 'none'),
+    },
+    {
+      id: 'opt-overlay',
+      label: '오버레이',
+      path: 'background.overlay',
+      on: config.background.overlay !== 'none',
+      set: (on) =>
+        override('background.overlay', on ? (base.background.overlay !== 'none' ? base.background.overlay : 'grain') : 'none'),
+    },
+    {
+      id: 'opt-decor',
+      label: '장식',
+      path: 'card.decor',
+      on: config.card.decor !== 'none',
+      set: (on) => override('card.decor', on ? (base.card.decor !== 'none' ? base.card.decor : 'corners') : 'none'),
     },
   ];
 
@@ -82,7 +98,7 @@ function LayerControls() {
       </div>
 
       <p className="mb-2 font-mono text-[11.5px] text-muted">motion/</p>
-      <div role="radiogroup" aria-label="모션 프리셋" className="grid grid-cols-3 gap-1.5">
+      <div role="radiogroup" aria-label="모션 프리셋" className="grid grid-cols-4 gap-1.5">
         {(Object.keys(motionPresets) as MotionName[]).map((m) => {
           const on = config.motion === m;
           return (
@@ -93,8 +109,8 @@ function LayerControls() {
               aria-checked={on}
               onClick={() => override('motion', m)}
               className={cn(
-                'grid cursor-pointer justify-items-center gap-0.5 rounded-ui-xs border px-1 py-2 font-mono text-[13px] font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
-                on ? 'border-transparent bg-accent text-on-accent' : 'border-line bg-surface-2 text-fg hover:border-accent',
+                'grid min-w-0 cursor-pointer justify-items-center gap-0.5 rounded-ui-xs ui-border px-1 py-2 font-mono text-[12.5px] font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+                on ? 'border-line bg-accent text-on-accent' : 'border-line bg-surface-2 text-fg hover:border-accent',
               )}
             >
               {m}
@@ -127,16 +143,20 @@ function fmt(v: unknown, depth: number, out: Seg[]) {
     const keys = Object.keys(v);
     if (keys.length === 0) return punc('{}');
     const flat = keys.every((k) => !isObj(v[k]) && !Array.isArray(v[k]));
-    if (depth > 0 && flat && keys.length <= 3) {
-      punc('{ ');
+    if (depth > 0 && flat) {
+      // 한 줄에 들어가는 짧은 객체만 한 줄로 씁니다.
+      const inline: Seg[] = [];
+      inline.push({ t: '{ ', k: 'punc' });
       keys.forEach((k, i) => {
-        if (i) punc(', ');
-        text(k);
-        punc(': ');
-        fmt(v[k], depth + 1, out);
+        if (i) inline.push({ t: ', ', k: 'punc' });
+        inline.push({ t: k }, { t: ': ', k: 'punc' });
+        fmt(v[k], depth + 1, inline);
       });
-      punc(' }');
-      return;
+      inline.push({ t: ' }', k: 'punc' });
+      if (inline.reduce((n, s) => n + s.t.length, 0) <= 36) {
+        out.push(...inline);
+        return;
+      }
     }
     const pad = '  '.repeat(depth + 1);
     punc('{');
@@ -200,8 +220,11 @@ function PresetCode() {
     ['motion', ui.config.motion, 'motion'],
     ['glow', ui.config.card.glow, 'card.glow'],
     ['tilt', ui.config.card.tilt ? 'on' : 'off', 'card.tilt'],
+    ['decor', ui.config.card.decor, 'card.decor'],
     ['ripple', ui.config.button.ripple ? 'on' : 'off', 'button.ripple'],
+    ['press', ui.config.button.press ? 'on' : 'off', 'button.press'],
     ['bg', shader === 'none' ? 'none' : `${shader} ×${ui.config.background.speed}`, 'background.shader'],
+    ['overlay', ui.config.background.overlay, 'background.overlay'],
     ['window', !isTauri() ? 'Tauri 전용' : ui.window.active ? ui.window.effects.join(' → ') : 'off', 'window'],
   ];
 
@@ -213,7 +236,7 @@ function PresetCode() {
           {copyLabel}
         </button>
       </PanelHead>
-      <pre className="overflow-x-auto rounded-ui-sm border border-line bg-code p-3.5 font-mono text-[12.5px] leading-[1.7]">
+      <pre className="overflow-x-auto rounded-ui-sm ui-border border-line bg-code p-3.5 font-mono text-[12.5px] leading-[1.7]">
         <code ref={codeRef}>
           {segs.map((s, i) => (
             <span key={i} className={s.k ? segClass[s.k] : undefined}>
@@ -230,7 +253,7 @@ function PresetCode() {
             <span
               key={k}
               className={cn(
-                'rounded-ui-xs border px-2 py-1.5 font-mono text-[11.5px] leading-tight text-muted',
+                'rounded-ui-xs ui-border px-2 py-1.5 font-mono text-[11.5px] leading-tight text-muted',
                 changed ? 'border-accent' : 'border-line',
               )}
             >
@@ -243,7 +266,7 @@ function PresetCode() {
   );
 }
 
-const SWATCHES: Array<keyof Tokens> = ['bg', 'surface', 'fg', 'muted', 'accent', 'accent2', 'radius', 'fontDisplay'];
+const SWATCHES: Array<keyof Tokens> = ['bg', 'surface', 'fg', 'accent', 'accent2', 'radius', 'borderWidth', 'fontDisplay'];
 const kebab = (k: string) => k.replace(/([a-z])([A-Z0-9])/g, '$1-$2').toLowerCase();
 
 function TokenSwatches() {
@@ -263,6 +286,8 @@ function TokenSwatches() {
             <div key={k} className="grid grid-cols-[30px_minmax(0,1fr)] items-center gap-x-2.5">
               {k === 'radius' ? (
                 <i className="row-span-2 size-[30px] border-2 border-accent" style={{ borderRadius: v }} />
+              ) : k === 'borderWidth' ? (
+                <i className="row-span-2 size-[30px] rounded-ui-xs border-solid border-fg" style={{ borderWidth: v }} />
               ) : k === 'fontDisplay' ? (
                 <i className="row-span-2 grid size-[30px] place-items-center rounded-ui-xs border border-line bg-surface-2 text-base not-italic type-display">
                   가

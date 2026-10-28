@@ -1,6 +1,6 @@
 import type { ComponentProps } from 'react';
 import { useUI } from '../engine/context';
-import type { GlowName } from '../engine/types';
+import type { DecorName, GlowName } from '../engine/types';
 import { glowVars } from '../effects/glows';
 import { useTilt } from '../effects/useTilt';
 import { cn } from '../lib/cn';
@@ -12,11 +12,14 @@ export type CardProps = ComponentProps<'div'> & {
   tilt?: boolean;
   /** 최대 기울기(도) */
   tiltMax?: number;
+  /** 생략하면 프리셋(card.decor)을 따릅니다. */
+  decor?: DecorName;
 };
 
-export function Card({ glow, tilt, tiltMax = 6, className, style, children, ...rest }: CardProps) {
+export function Card({ glow, tilt, tiltMax = 6, decor, className, style, children, ...rest }: CardProps) {
   const { config } = useUI();
   const tiltOn = tilt ?? config.card.tilt;
+  const decorName = decor ?? config.card.decor;
   const ref = useTilt<HTMLDivElement>(tiltOn ? tiltMax : 0);
 
   const glowName: GlowName | null =
@@ -31,9 +34,10 @@ export function Card({ glow, tilt, tiltMax = 6, className, style, children, ...r
   return (
     <div
       ref={ref}
+      data-decor={decorName === 'none' ? undefined : decorName}
       style={glowName ? { ...glowVars(glowName), ...style } : style}
       className={cn(
-        'relative rounded-ui border border-line bg-surface ui-backdrop glow transition',
+        'relative rounded-ui ui-border border-line bg-surface ui-backdrop ui-clip glow transition',
         tiltOn && 'tilt sheen data-tilting:duration-75 data-tilting:ease-linear',
         className,
       )}

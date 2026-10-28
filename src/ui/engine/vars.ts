@@ -1,6 +1,6 @@
 import { glows } from '../effects/glows';
 import { motionPresets } from '../motion/presets';
-import type { PresetConfig, Scheme, Theme, Tokens } from './types';
+import type { OverlayName, PresetConfig, Scheme, Theme, Tokens } from './types';
 
 const kebab = (k: string) => k.replace(/([a-z])([A-Z0-9])/g, '$1-$2').toLowerCase();
 
@@ -32,8 +32,13 @@ export function buildVars(
   return vars;
 }
 
-export function applyVars(el: HTMLElement, vars: Record<string, string>, scheme: Scheme): void {
+export function applyVars(
+  el: HTMLElement,
+  vars: Record<string, string>,
+  opts: { scheme: Scheme; overlay: OverlayName },
+): void {
   for (const [k, v] of Object.entries(vars)) el.style.setProperty(k, v);
-  el.style.colorScheme = scheme;
-  el.dataset.scheme = scheme;
+  el.style.colorScheme = opts.scheme;
+  el.dataset.scheme = opts.scheme;
+  el.dataset.overlay = opts.overlay;
 }

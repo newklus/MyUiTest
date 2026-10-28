@@ -32,6 +32,15 @@ const packs = [
   { name: 'glass', hint: '유리' },
   { name: 'neon', hint: '네온' },
   { name: 'minimal', hint: '미니멀' },
+  { name: 'terminal', hint: '터미널' },
+  { name: 'brutal', hint: '브루탈' },
+  { name: 'clay', hint: '클레이' },
+  { name: 'macos', hint: '맥OS 느낌' },
+  { name: 'goryeo', hint: '중세 한국' },
+  { name: 'cyber', hint: '사이버펑크' },
+  { name: 'forest', hint: '숲속' },
+  { name: 'fantasy', hint: '판타지' },
+  { name: 'steampunk', hint: '스팀펑크' },
   { name: 'calm', hint: 'glass 상속' },
 ];
 
@@ -63,8 +72,8 @@ export default function App() {
 
       <main className="min-h-0 flex-1 overflow-y-auto">
         <div className="mx-auto grid max-w-6xl gap-6 px-6 pt-7 pb-16">
-          <header className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
-            <div className="min-w-0 flex-[1_1_320px]">
+          <header className="grid gap-5">
+            <div className="min-w-0">
               <p className="mb-2 font-mono text-xs text-muted">src/ui · React 19 + Tailwind v4 + Tauri 2</p>
               <h1 className="type-display text-glow text-[clamp(28px,4vw,42px)] leading-tight tracking-tight [text-wrap:balance]">
                 UI 엔진 프리셋
@@ -74,7 +83,7 @@ export default function App() {
                 엔진이 정합니다.
               </p>
             </div>
-            <PresetSwitcher items={packs} className="max-w-[520px] flex-[1_1_360px]" />
+            <PresetSwitcher items={packs} minItemWidth={136} />
           </header>
 
           <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
@@ -127,7 +136,7 @@ export default function App() {
                         defaultValue="atlas-desktop"
                         spellCheck={false}
                         autoComplete="off"
-                        className="w-full rounded-ui-xs border border-line bg-surface-2 px-3 py-2.5 font-mono text-sm text-fg transition focus:border-accent focus:ring-3 focus:ring-accent/25 focus:outline-none"
+                        className="w-full rounded-ui-xs ui-border border-line bg-surface-2 px-3 py-2.5 font-mono text-sm text-fg transition focus:border-accent focus:ring-3 focus:ring-accent/25 focus:outline-none"
                       />
                     </div>
                     <label htmlFor="app-update" className="flex cursor-pointer items-center justify-between gap-2.5 border-t border-line py-2.5">

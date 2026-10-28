@@ -27,4 +27,10 @@ export const motionPresets: Record<MotionName, MotionPreset> = {
     easing: 'cubic-bezier(.2,0,0,1)',
     transition: { type: 'tween', duration: 0.16, ease: [0.2, 0, 0, 1] },
   },
+  /** 옛 단말기처럼 뚝뚝 끊기며 움직입니다. Motion 라이브러리에는 steps 곡선이 없어 선형으로 근사합니다. */
+  stepped: {
+    duration: 320,
+    easing: 'steps(5, end)',
+    transition: { type: 'tween', duration: 0.32, ease: [0, 0, 1, 1] },
+  },
 };
